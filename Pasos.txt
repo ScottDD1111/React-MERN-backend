@@ -1,0 +1,179 @@
+1- Creamos el package.json haciendo: npm init -y
+2- Creamos el archivo index.js y lo ejecutamos haciendo: node index.js
+3- Instalamos el packete para ejecutar el comando {node}, cada vez que detecte cambios: npm i nodemon -g
+4- Creamos dos scripts, para ejecutar el proyecto
+   dev: npm run dev   // es en modo desarrollo
+   start: npm start  //produccion, es para levantar en modo produccion
+
+   Los scripts en el archivo package.json de un proyecto Node.js se utilizan para definir 
+   comandos personalizados que se pueden ejecutar desde la línea de comandos utilizando el gestor de paquetes npm. 
+
+   "dev": "nodemon index.js": Este script se utiliza para iniciar el servidor en modo de desarrollo utilizando nodemon. 
+   nodemon es una herramienta que reinicia automáticamente la aplicación cuando detecta cambios en los archivos del proyecto. 
+   Esto es útil durante el desarrollo porque no necesitas reiniciar manualmente el servidor cada vez que haces cambios en el código.
+
+   "start": "node index.js": Este script se utiliza para iniciar el servidor en modo de producción utilizando node. 
+   node es el entorno de ejecución de JavaScript en el que se ejecuta tu aplicación. 
+   Este script no incluye la funcionalidad de reinicio automático que proporciona nodemon, 
+   por lo que es más adecuado para el entorno de producción.
+
+
+5- Instalamos express- npm i express
+   5.1- En el index.js importamos express: const express = require('express);
+   5.2- Creamos el servidor: const app = express();
+   5.3- Definimos una ruta get y definimos el puerto donde escucha
+
+6- Creamos un directorio llamado public, el cual contiene un index html y un css para ese index
+   6.1- en el index.js, utilizamos este middleware - app.use(express.static('public')); para establecer que cuando se haga una peticion a mi servidor, apunte a ese path
+   6.2- Creamos un archivo de variables de entorno con extension .env, y pusimos el puerto
+   6.3- Instalamos npm i dotenv para darle acceso a las variables de entorno a todo el proyecto
+   6.4- Colocamos required('dotenv').config(); en index.js para tener acceso a esas variables
+   En resumen, agregaste el uso del paquete dotenv para manejar variables de entorno, configuraste Express para servir archivos estáticos desde un directorio public, y actualizaste el servidor para escuchar en un puerto definido por una variable de entorno.
+
+
+7- Creamos una carpeta llamada routes
+   7.1- Creamos un archivo llamado auth.js el cual va a contener las rutas de auth
+   7.2- Usamos devuelte el app.use para decirle que todo lo que esta exportado desde /routes/auth, lo va habilitar en /api/auth
+   7.3- en auth.js importamos router de forma desestructurada y creamos una instancia del enrutador
+   7.4- Definimos una ruta GET y exportamos el enrutador
+
+8- Declaramos las 3 rutaas de usuario, create, login y renovarToken. Creamos una carpeta llamada controllers y dentro auth.js para manejar el req y resp
+   8.1- Cuando las declaramos, tambien creamos el controlador de estas para manejar el request y response en otro archivo -> auth.js en la carpeta controllers
+
+
+9- Queremos recibir la peticion de un body, y para eso necesitamos usar otro middleware
+   9.1- Para parsear el body tenemos que pasar las peticiones por este middleware: app.use(express.json())
+   9.2- Luego de incluir este middleware, obtenemos de la request, de su body los atributos name, email y password y los devolvemos en la response
+   9.3- Ademas agragamos un status(400) para responder cuando no pasa la validacion por ejemplo el name
+
+
+10- Instalamos el validator de express- npm i express-validator
+    10.1- en las rutas, agregamos un nuevo argumento que es un array de middlewares, para que se ejecuten antes de llegar al controllers
+    10.2- Estos middleware lo que hace es validar los campos y son llamados check
+    10.3- Luego creamos una carpeta llamada middleware y  un middleware personalizado que permite validar si esos middlewares atneriores son validos o no y en base a eso, 
+          ejecutar la el controller o mandar un error 401
+
+
+11- Creamos una cuenta en mongodb.com actualizaste
+    11.1- Creamos usuario y contraseña de la base de datos
+    11.2- Lo conectamos a mongo compass
+
+
+12- Instalamos mongoose- npm i mongoose
+    12.1- Creamos la clase de conexion en una carpeta que creamos llamada database y dentro un archivo config.js que tiene la conexion a la base de datos
+
+13- Cremos la carpeta models y dentro usuario.js
+    Este código define un modelo de usuario para una base de datos MongoDB usando Mongoose. Primero, se crea un esquema (UsuarioSchema) que especifica la estructura 
+    del documento, incluyendo los campos name, email, y password, junto con sus restricciones (obligatorios y únicos). 
+    Luego, se exporta el modelo Usuario basado en este esquema, permitiendo la creación, lectura, actualización y eliminación de documentos de usuario en la base de datos.
+
+    13.1- Luego en auth.js en el controlador, instanciamos ese schema y le pasamos el req.body, para luego llamar al metodo save de mongoose
+    El método save proviene de la instancia del modelo de Mongoose (Usuario). Aunque no importas explícitamente mongoose en este archivo, el modelo Usuario que 
+    importaste de ../models/usuarios ya está configurado para usar Mongoose y proporciona el método save automáticamente.
+
+
+14- Utilizamos el findOne para validar si existe el usuario en base al mail, de lo contrario, nos deja guardarlo
+
+15- Instalamos un encriptador de contraseñas- npm i bcryptjs
+    15.1- Hacemos la importacion en el auth.js - const bcrypt = require('bcryptjs');
+    15.2- //Encriptar password
+         
+         const salt = bcrypt.genSaltSync();
+         usuario.password = bcrypt.hashSync(password, salt);
+         
+         Este código encripta la contraseña del usuario antes de guardarla en la base de datos. Genera un "salt" aleatorio (un valor aleatorio añadido a la 
+         contraseña para mejorar la seguridad) usando bcrypt.genSaltSync(). Luego, utiliza bcrypt.hashSync(password, salt) 
+         para crear un hash (una representación encriptada) seguro de la contraseña, asignando este hash al campo password del usuario.
+         Supongamos dos usuarios tienen la misma contraseña "password123". Sin un salt, ambos hashes serían idénticos. Con un salt, los hashes serán diferentes:
+
+         Usuario 1:
+
+         Contraseña: "password123"
+         Salt: "abcd1234"
+         Hash: hash("password123abcd1234")
+         Usuario 2:
+
+         Contraseña: "password123"
+         Salt: "xyz987"
+         Hash: hash("password123xyz987")
+         Como resultado, los hashes almacenados en la base de datos serán distintos, aunque las contraseñas originales sean las mismas.
+
+16- Ahora intentaremos loggearnos, para eso primero validamos si existe el email, si no existe retornamos status 400
+    16.1- Luegoo con el metodo bcrypt.compareSync le pasamos la password que recibimos del req y la password del usuario que encontramos con el mail,
+          si no es igual, retornamos 400, en caso afirmativo retornamos uid y name y status 201
+
+17- Instalamos el jwt- npm i jsonwebtoken
+    En el paso 17, instalaste el paquete jsonwebtoken y creaste una función generarJWT para generar JSON Web Tokens (JWT). Esta función toma un identificador de 
+    usuario (uid) y un nombre (name) como entrada, y crea un token JWT con una validez de 2 horas usando una clave secreta definida en las variables de entorno. 
+    El token se genera en una promesa y se resuelve si la operación es exitosa, o se rechaza en caso de error.
+
+   ¿Qué es JWT?
+   JSON Web Token (JWT) es un estándar abierto (RFC 7519) para transmitir información segura entre partes como un objeto JSON. Los JWT son compactos, seguros 
+   y se utilizan comúnmente para autenticar usuarios y autorizar accesos en aplicaciones web. Un JWT consta de tres partes: un encabezado (header), 
+   una carga útil (payload) y una firma (signature). La firma asegura que el token no haya sido alterado después de su emisión. Los JWT permiten verificar 
+   la identidad del usuario y transmitir datos de manera segura entre el cliente y el servidor.
+
+
+
+18 - En el paso 18, implementaste la funcionalidad para validar y renovar un JSON Web Token (JWT) en tu aplicación. Definiste una nueva ruta para renovar el 
+     token (/renew), la cual utiliza el middleware validarJWT para asegurar que solo las solicitudes con un token válido puedan acceder a ella. 
+     
+     Este middleware extrae el token del encabezado x-token de la solicitud, verifica su validez usando una clave secreta, y si el token es válido, 
+     añade el uid y el name del usuario al objeto de la solicitud, permitiendo que la solicitud continúe. Si el token no es válido o está ausente, 
+     responde con un error 401 (No autorizado). 
+
+     La función revalidarToken se encarga de renovar el token JWT. Obtiene el uid y el name del usuario a partir de la solicitud (añadidos por el middleware validarJWT), 
+     y luego genera un nuevo token utilizando la función generarJWT. Finalmente, responde con un código 201 y un objeto JSON que indica que todo está bien (ok: true) 
+     y contiene el nuevo token. De esta forma, se garantiza que solo los usuarios con tokens válidos puedan renovar sus tokens, manteniendo la seguridad de la aplicación.
+
+
+19- Instalamos CORS- npm i cors
+
+20- Creamps el controller events.js
+    20.1- Creamps la route en el index.js -> app.use('/api/events', require('./routes/events'));
+    20.2- Creamos el router events.js, el cual define las rutas hacia los controladores
+    20.3- Colocar router.use(validarJWT); hace que todas las rutas luego de esa declaración, soliciten el token de acceso
+    20.4- Punto importante, hay que enviar el token en las peticiones, y eso lo hacemos a traves del validarJWT, el cual se envia en el header
+
+21- Creamos el modelo Evento.js, el cual tiene todo el objeto Evento
+    
+22- En las rutas de event, realizamos las validaciones correspondientes, abriendo un array de middleware en la ruta de create evento y por ultimo colocando el validarCampos
+    el cual se encarga de tomar todos los check y ver que no hayan errores
+
+    22.1- Cuando se realiza una solicitud POST para crear un evento, los datos de la solicitud (como title, start, y end) se validan mediante el middleware express-validator. 
+    La ruta define validaciones que verifican que title no esté vacío y que start y end sean fechas válidas usando la función isDate. 
+    Esta función utiliza Moment.js para comprobar si el valor es una fecha válida. Si todas las validaciones pasan, se llama al controlador createEvent; 
+    de lo contrario, el middleware validarCampos gestiona y devuelve los errores al cliente, asegurando que solo se procesen datos válidos.
+
+    en resumidas cuentas, lo que hace es validar la fecha que llega con moment, 
+
+
+23- En el controller createEvent, obtenemos el evento que llega desde la request
+    23.1- Tambien desde la request, gracias a validar el token, obtenemos el id del usuario
+          En concreto desde el middleware {validar-jwt}
+          Ahí una vez obtenemos el token y hacemos la validaciones, hacemos:
+            req.uid = uid;
+            req.name = name;
+            
+    23.2- Guardamos el evento en la base de datos y retornamos la respuesta
+    23.3- Este codigo a continuación en el modelo evento.js es para eliminar el __v que es la version y renombrar el id a la hora de obtener la respuesta en el json
+        EventoSchema.method('toJSON', function () {
+            const { __v, _id, ...object } = this.toObject();
+            object.id = _id;
+            return object;
+        });
+
+
+
+24- Hicimos el controller getEventos, el cual hacemos un find junto con un populate
+    24.1- El populate es para concatenar el usuario, en este caso, concatenar el usuario solamente con el name y el id que ya viene por si
+
+
+
+25- Creamos los metodos actualizarEvento y eliminarEvento, cada uno validando si existe el evento y si el user que quiere
+    enviar la accion, es el mismo que lo creamos
+
+    
+    
+
+    

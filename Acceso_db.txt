@@ -1,0 +1,2 @@
+db_user; ScottDD11
+db_pass; R0m3o.11DB
