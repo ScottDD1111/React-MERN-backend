@@ -173,6 +173,13 @@
 25- Creamos los metodos actualizarEvento y eliminarEvento, cada uno validando si existe el evento y si el user que quiere
     enviar la accion, es el mismo que lo creamos
 
+
+
+26- Desplegar en github
+    26.1- Inicializamos git- git init
+    26.2- Agragamos todo- git add . 
+    36.3- Comiteamos- git commit - m "Firs commit"
+
     
     
 
